@@ -13,6 +13,7 @@ namespace Python.Included
     {
         public const string EMBEDDED_PYTHON = "python-3.7.3-embed-amd64";
         public const string PYTHON_VERSION = "python37";
+        public const string GET_PIP = "get-pip.py";
         /// <summary>
         /// Path to install python. If needed set it before calling SetupPython().
         /// <para>Default is: Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)</para>
@@ -134,9 +135,7 @@ namespace Python.Included
             string module_name = resource_name.Split('-').FirstOrDefault();
             if (string.IsNullOrWhiteSpace(module_name))
                 throw new ArgumentException($"The resource name '{resource_name}' did not contain a valid module name");
-            string libDir = Path.Combine(EmbeddedPythonHome, "Lib");
-            if (!Directory.Exists(libDir))
-                Directory.CreateDirectory(libDir);
+            var libDir = CreateLibDir();
             string module_path = Path.Combine(libDir, module_name);
             if (!force && Directory.Exists(module_path))
                 return;
@@ -150,6 +149,14 @@ namespace Python.Included
                 try { InstallPip(); } catch { throw new FileNotFoundException("pip is not installed"); }
 
             RunCommand($"{pipPath} install {wheelPath}");
+        }
+
+        private static string CreateLibDir()
+        {
+            string libDir = Path.Combine(EmbeddedPythonHome, "Lib");
+            if (!Directory.Exists(libDir))
+                Directory.CreateDirectory(libDir);
+            return libDir;
         }
 
         public static void PipInstallModule(string module_name, bool force = false)
@@ -167,7 +174,7 @@ namespace Python.Included
 
         public static void InstallPip()
         {
-            string libDir = Path.Combine(EmbeddedPythonHome, "Lib");
+            var libDir = CreateLibDir();
             RunCommand($"cd {libDir} && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py");
             RunCommand($"cd {EmbeddedPythonHome} && python.exe Lib\\get-pip.py");
         }
@@ -192,7 +199,7 @@ namespace Python.Included
             return Directory.Exists(moduleDir) && File.Exists(Path.Combine(moduleDir, "__init__.py"));
         }
 
-        public static void RunCommand(string command, bool runInBackground = false)
+        public static void RunCommand(string command, bool runInBackground = true)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();

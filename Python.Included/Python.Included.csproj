@@ -17,10 +17,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\get-pip.py" />
     <None Remove="Resources\python-3.7.3-embed-amd64.zip" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\get-pip.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\python-3.7.3-embed-amd64.zip" />
   </ItemGroup>
 
