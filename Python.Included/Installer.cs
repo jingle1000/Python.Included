@@ -46,7 +46,7 @@ namespace Python.Included
                 try
                 {
                     ZipFile.ExtractToDirectory(zip, zip.Replace(".zip", ""));
-                    
+
                     // allow pip on embedded python installation
                     // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
                     var pth = Path.Combine(EmbeddedPythonHome, PYTHON_VERSION + "._pth");
@@ -161,22 +161,30 @@ namespace Python.Included
 
         public static void PipInstallModule(string module_name, bool force = false)
         {
+            SetPythonPath();
             if (!IsPipInstalled())
                 try { InstallPip(); } catch { throw new FileNotFoundException("pip is not installed"); }
 
             if (IsModuleInstalled(module_name) && !force)
                 return;
 
-            string pipPath = Path.Combine(EmbeddedPythonHome, "Scripts", "pip");
+            string pipPath = Path.Combine(EmbeddedPythonHome, "Scripts", "pip3.exe");
             string forceInstall = force ? " --force-reinstall" : "";
             RunCommand($"{pipPath} install {module_name}{forceInstall}");
         }
+        public static void SetPythonPath()
+        {
+            string path = EmbeddedPythonHome + ";" + EmbeddedPythonHome + @"\DLLs;" + EmbeddedPythonHome + @"\Lib;" + EmbeddedPythonHome + @"\Lib\site-packages;";
+            Environment.SetEnvironmentVariable("PYTHONPATH", path);
+        }
 
         public static void InstallPip()
+
         {
+            SetPythonPath();
             var libDir = CreateLibDir();
-            RunCommand($"cd {libDir} && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py");
-            RunCommand($"cd {EmbeddedPythonHome} && python.exe Lib\\get-pip.py");
+            RunCommand($"cd {EmbeddedPythonHome} && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py");
+            RunCommand($"cd {EmbeddedPythonHome} && python.exe get-pip.py");
         }
 
         public static bool IsPythonInstalled()
@@ -201,6 +209,7 @@ namespace Python.Included
 
         public static void RunCommand(string command, bool runInBackground = true)
         {
+
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
             if (runInBackground)
