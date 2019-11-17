@@ -18,6 +18,8 @@
 
   <ItemGroup>
     <None Remove="Resources\get-pip.py" />
+    <None Remove="Resources\python-3.6.1-embed-amd64.zip" />
+    <None Remove="Resources\python-3.6.8-embed-amd64.zip" />
     <None Remove="Resources\python-3.7.3-embed-amd64.zip" />
   </ItemGroup>
 
@@ -25,11 +27,17 @@
     <EmbeddedResource Include="Resources\get-pip.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\python-3.6.1-embed-amd64.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\python-3.6.8-embed-amd64.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\python-3.7.3-embed-amd64.zip" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Python.Runtime.NETStandard" Version="3.7.0" />
+    <PackageReference Include="Python.Runtime.NETStandard" Version="3.6.1" />
   </ItemGroup>
 
 </Project>

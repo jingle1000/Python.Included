@@ -11,8 +11,8 @@ namespace Python.Included
 {
     public static class Installer
     {
-        public const string EMBEDDED_PYTHON = "python-3.7.3-embed-amd64";
-        public const string PYTHON_VERSION = "python37";
+        public const string EMBEDDED_PYTHON = "python-3.6.1-embed-amd64";
+        public const string PYTHON_VERSION = "python36";
         public const string GET_PIP = "get-pip.py";
         /// <summary>
         /// Path to install python. If needed set it before calling SetupPython().
@@ -32,8 +32,8 @@ namespace Python.Included
         {
             if (!PythonEnv.DeployEmbeddedPython)
                 return;
-            if (Runtime.Runtime.pyversion != "3.7")
-                throw new InvalidOperationException("You must compile Python.Runtime with PYTHON37 flag! Runtime version: " + Runtime.Runtime.pyversion);
+            if (Runtime.Runtime.pyversion != "3.6")
+                throw new InvalidOperationException("You must compile Python.Runtime with PYTHON36 flag! Runtime version: " + Runtime.Runtime.pyversion);
             Environment.SetEnvironmentVariable("PATH", $"{EmbeddedPythonHome};" + Environment.GetEnvironmentVariable("PATH"));
             if (!force && Directory.Exists(EmbeddedPythonHome) && File.Exists(Path.Combine(EmbeddedPythonHome, "python.exe"))) // python seems installed, so exit
                 return;
@@ -55,7 +55,7 @@ namespace Python.Included
                 }
                 catch (Exception e)
                 {
-                    // todo log
+                    Console.WriteLine(e);
                 }
             });
         }
@@ -111,7 +111,7 @@ namespace Python.Included
                 }
                 catch (Exception e)
                 {
-                    // todo
+                    Console.WriteLine(e);
                 }
                 // modify _pth file
                 var pth = Path.Combine(EmbeddedPythonHome, PYTHON_VERSION + "._pth");
@@ -161,7 +161,6 @@ namespace Python.Included
 
         public static void PipInstallModule(string module_name, bool force = false)
         {
-            SetPythonPath();
             if (!IsPipInstalled())
                 try { InstallPip(); } catch { throw new FileNotFoundException("pip is not installed"); }
 
@@ -172,16 +171,16 @@ namespace Python.Included
             string forceInstall = force ? " --force-reinstall" : "";
             RunCommand($"{pipPath} install {module_name}{forceInstall}");
         }
-        public static void SetPythonPath()
+        public static string SetPythonPath()
         {
             string path = EmbeddedPythonHome + ";" + EmbeddedPythonHome + @"\DLLs;" + EmbeddedPythonHome + @"\Lib;" + EmbeddedPythonHome + @"\Lib\site-packages;";
             Environment.SetEnvironmentVariable("PYTHONPATH", path);
+            Environment.SetEnvironmentVariable("PYTHONHOME", path);
+            return path;
         }
 
         public static void InstallPip()
-
         {
-            SetPythonPath();
             var libDir = CreateLibDir();
             RunCommand($"cd {EmbeddedPythonHome} && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py");
             RunCommand($"cd {EmbeddedPythonHome} && python.exe get-pip.py");
